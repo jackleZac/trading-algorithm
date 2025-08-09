@@ -3,9 +3,14 @@ import os
 import pandas as pd
 import backtrader as bt
 from backtrader.analyzers import SharpeRatio, DrawDown, TradeAnalyzer
-from ema_bollinger_strategy import EMABollingerStrategy
+from strategy.ema_bollinger_strategy import EMABollingerStrategy
 
-def run_backtest(csv_file, initial_cash=100000.0, commission=0.001, plot=False, plot_file=None):
+STRATEGY_MAP = {
+    'ema_bollinger': EMABollingerStrategy,
+}
+
+
+def run_backtest(csv_file, selected_strategy, initial_cash=100000.0, commission=0.001, plot=False, plot_file=None):
     """
     Run backtest with the specified CSV file and parameters.
     
@@ -18,7 +23,7 @@ def run_backtest(csv_file, initial_cash=100000.0, commission=0.001, plot=False, 
     """
     # Initialize Cerebro engine
     cerebro = bt.Cerebro()
-    cerebro.addstrategy(EMABollingerStrategy)
+    cerebro.addstrategy(selected_strategy)
 
     # Load data from CSV
     if not os.path.exists(csv_file):
@@ -94,11 +99,17 @@ def run_backtest(csv_file, initial_cash=100000.0, commission=0.001, plot=False, 
             print(f"Plotting failed: {e}. Try running without --plot or check matplotlib compatibility.")
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Backtest EMA and Bollinger Bands strategy')
+    parser = argparse.ArgumentParser(description=f"Backtesting a Strategy")
     parser.add_argument('--csv', type=str, default='data.csv', help='Path to CSV data file')
+    parser.add_argument('--strategy', type=str, required=True, help='Strategy name to use (e.g., ema_bollinger)')
     parser.add_argument('--cash', type=float, default=100000.0, help='Initial portfolio cash')
     parser.add_argument('--commission', type=float, default=0.001, help='Broker commission per trade')
     parser.add_argument('--plot', action='store_true', help='Plot the backtest results')
     args = parser.parse_args()
 
-    run_backtest(args.csv, args.cash, args.commission, args.plot)
+    # Validate the selected strategy
+    if args.strategy not in STRATEGY_MAP:
+        raise ValueError(f"Unknown strategy '{args.strategy}'. Available strategies: {list(STRATEGY_MAP.keys())}")
+
+    selected_strategy = STRATEGY_MAP[args.strategy]
+    run_backtest(args.csv, selected_strategy, args.cash, args.commission, args.plot)

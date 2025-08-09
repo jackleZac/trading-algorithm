@@ -35,8 +35,10 @@ This project implements a backtesting script for a trading strategy using EMA (5
    pip install -r requirements.txt
 
 5. **Backtest a strategy**
+   
+   Example: EMA Bollinger
    ```sh
-   python3 backtest.py --csv gold_4h_data_cleaned.csv --plot-file backtest_plot.png
+   python3 backtest.py --csv data/gold_4h_data_cleaned.csv --strategy ema_bollinger --plot-file backtest_plot.png
 
 # Example Results
 ![alt text](image.png)
