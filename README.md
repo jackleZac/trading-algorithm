@@ -1,6 +1,6 @@
-# Trading Algorithm: EMA and Bollinger Bands
+# Trading Algorithms with Python
 
-This project implements a backtesting script for a trading strategy using EMA (50, 20) and Bollinger Bands with Backtrader.
+This project implements a backtesting script for a trading strategy with Backtrader.
 
 1. **Clone the Repository**
 
@@ -40,5 +40,12 @@ This project implements a backtesting script for a trading strategy using EMA (5
    ```sh
    python3 backtest.py --csv data/gold_4h_data_cleaned.csv --strategy ema_bollinger --plot-file backtest_plot.png
 
-# Example Results
+## Example Results
 ![alt text](image.png)
+
+## Library
+- BackTrader Python: https://www.backtrader.com/docu/quickstart/quickstart/
+
+## Data
+The historical XAUUSD data (4-hour) is downloaded from: 
+- https://www.kaggle.com/datasets/novandraanugrah/xauusd-gold-price-historical-data-2004-2024
