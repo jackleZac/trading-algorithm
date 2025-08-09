@@ -4,9 +4,11 @@ import pandas as pd
 import backtrader as bt
 from backtrader.analyzers import SharpeRatio, DrawDown, TradeAnalyzer
 from strategy.ema_bollinger_strategy import EMABollingerStrategy
+from strategy.support_resistance_strategy import MVSupportResistanceStrategy
 
 STRATEGY_MAP = {
     'ema_bollinger': EMABollingerStrategy,
+    'support_resistance': MVSupportResistanceStrategy
 }
 
 
@@ -55,7 +57,8 @@ def run_backtest(csv_file, selected_strategy, initial_cash=100000.0, commission=
     cerebro.adddata(data)
     cerebro.broker.setcash(initial_cash)
     cerebro.broker.setcommission(commission=commission)
-    cerebro.addsizer(bt.sizers.FixedSize, stake=100)
+    # Risk 0.01 lot every trade
+    cerebro.addsizer(bt.sizers.FixedSize, stake=1)
 
     # Add analyzers for performance metrics
     cerebro.addanalyzer(SharpeRatio, _name='sharpe', timeframe=bt.TimeFrame.Days)
