@@ -5,18 +5,20 @@ import backtrader as bt
 from backtrader.analyzers import SharpeRatio, DrawDown, TradeAnalyzer
 from strategy.ema_bollinger_strategy import EMABollingerStrategy
 from strategy.support_resistance_strategy import EMAMultiSupportResistanceStrategy
+from strategy.support_resistance_strategy import ATRSupportResistanceStrategy
 from strategy.breakout_strategy import BreakoutStrategy
 
 STRATEGY_MAP = {
     'ema_bollinger': EMABollingerStrategy,
-    'multi_support_resistance': EMAMultiSupportResistanceStrategy,
+    'ema_support_resistance': EMAMultiSupportResistanceStrategy,
+    'atr_support_resistance': ATRSupportResistanceStrategy,
     'breakout': BreakoutStrategy
 }
 
 def run_backtest(
         csv_file, 
         selected_strategy, 
-        initial_cash=100000.0, 
+        initial_cash=1000.0, 
         commission=0.001, 
         plot=False, 
         plot_file=None,
@@ -138,7 +140,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=f"Backtesting a Strategy")
     parser.add_argument('--csv', type=str, default='data/XAUUSD_1H.csv', help='Path to CSV data file')
     parser.add_argument('--strategy', type=str, required=True, help='Strategy name (e.g., ema_bollinger)')
-    parser.add_argument('--cash', type=float, default=100000.0, help='Initial portfolio cash')
+    parser.add_argument('--cash', type=float, default=1000.0, help='Initial portfolio cash')
     parser.add_argument('--commission', type=float, default=0.001, help='Broker commission per trade')
     parser.add_argument('--plot', action='store_true', help='Plot the backtest results')
     parser.add_argument('--multi_timeframe', action='store_true', help='Use multiple timeframe feeds (15m, 1h, 4h)')
