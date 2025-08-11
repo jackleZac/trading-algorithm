@@ -4,14 +4,24 @@ import pandas as pd
 import backtrader as bt
 from backtrader.analyzers import SharpeRatio, DrawDown, TradeAnalyzer
 from strategy.ema_bollinger_strategy import EMABollingerStrategy
-from strategy.support_resistance_strategy import MVSupportResistanceStrategy
+from strategy.support_resistance_strategy import EMAMultiSupportResistanceStrategy
+from strategy.breakout_strategy import BreakoutStrategy
 
 STRATEGY_MAP = {
     'ema_bollinger': EMABollingerStrategy,
-    'support_resistance': MVSupportResistanceStrategy
+    'multi_support_resistance': EMAMultiSupportResistanceStrategy,
+    'breakout': BreakoutStrategy
 }
 
-def run_backtest(csv_file, selected_strategy, initial_cash=100000.0, commission=0.001, plot=False, plot_file=None):
+def run_backtest(
+        csv_file, 
+        selected_strategy, 
+        initial_cash=100000.0, 
+        commission=0.001, 
+        plot=False, 
+        plot_file=None,
+        multi_timeframe=False
+    ):
     """
     Run backtest with the specified CSV file and parameters.
     
@@ -21,6 +31,7 @@ def run_backtest(csv_file, selected_strategy, initial_cash=100000.0, commission=
         commission (float): Broker commission per trade (e.g., 0.001 = 0.1%).
         plot (bool): Whether to plot the results.
         plot_file (str, optional): File path to save the plot (e.g., 'plot.png').
+        If multi_timeframe=True, additional data feeds for higher timeframes will be added.
     """
     # Initialize Cerebro
     cerebro = bt.Cerebro()
@@ -31,7 +42,7 @@ def run_backtest(csv_file, selected_strategy, initial_cash=100000.0, commission=
         raise FileNotFoundError(f"CSV file {csv_file} not found")
 
     try:
-        # Load CSV (Alpha Vantage 1H data from save_date.py)
+        # Load CSV (csv data from save_date.py)
         data_df = pd.read_csv(csv_file, parse_dates=[0], index_col=0)
 
         # Ensure column names are capitalized for Backtrader
@@ -45,28 +56,48 @@ def run_backtest(csv_file, selected_strategy, initial_cash=100000.0, commission=
     except Exception as e:
         raise ValueError(f"Failed to load CSV or parse dates: {e}")
 
-    # Create Backtrader feed
-    data = bt.feeds.PandasData(
-        dataname=data_df,
-        timeframe=bt.TimeFrame.Minutes,
-        compression=60  # 1-hour bars
-    )
+    # --- Add data feeds ---
+    if multi_timeframe:
+        # Base data is 15-min or lower for resampling
+        base_data = bt.feeds.PandasData(
+            dataname=data_df,
+            timeframe=bt.TimeFrame.Minutes,
+            compression=15
+        )
+        # index 0 (execution timeframe)
+        cerebro.adddata(base_data)
 
-    cerebro.adddata(data)
+        # 1H feed
+        cerebro.resampledata(base_data, timeframe=bt.TimeFrame.Minutes, compression=60)
+
+        # 4H feed
+        cerebro.resampledata(base_data, timeframe=bt.TimeFrame.Minutes, compression=240)
+
+    else:
+        # Single timeframe feed (e.g., 1H data)
+        data = bt.feeds.PandasData(
+            dataname=data_df,
+            timeframe=bt.TimeFrame.Minutes,
+            compression=60
+        )
+        cerebro.adddata(data)
+
+    # --- Broker and sizer ---
     cerebro.broker.setcash(initial_cash)
     cerebro.broker.setcommission(commission=commission)
     cerebro.addsizer(bt.sizers.FixedSize, stake=5)
 
-    # Add analyzers
+    # --- Analyzers ---
     cerebro.addanalyzer(SharpeRatio, _name='sharpe', timeframe=bt.TimeFrame.Days)
     cerebro.addanalyzer(DrawDown, _name='drawdown')
     cerebro.addanalyzer(TradeAnalyzer, _name='trades')
 
+    # --- Run ---
     print(f'Starting Portfolio Value: {cerebro.broker.getvalue():.2f}')
     results = cerebro.run()
     strategy = results[0]
 
-    # Metrics
+    # --- Metrics ---
     print(f'Ending Portfolio Value: {cerebro.broker.getvalue():.2f}')
     sharpe = strategy.analyzers.sharpe.get_analysis()
     drawdown = strategy.analyzers.drawdown.get_analysis()
@@ -110,11 +141,12 @@ if __name__ == '__main__':
     parser.add_argument('--cash', type=float, default=100000.0, help='Initial portfolio cash')
     parser.add_argument('--commission', type=float, default=0.001, help='Broker commission per trade')
     parser.add_argument('--plot', action='store_true', help='Plot the backtest results')
+    parser.add_argument('--multi_timeframe', action='store_true', help='Use multiple timeframe feeds (15m, 1h, 4h)')
     args = parser.parse_args()
 
     if args.strategy not in STRATEGY_MAP:
         raise ValueError(f"Unknown strategy '{args.strategy}'. Available: {list(STRATEGY_MAP.keys())}")
 
     selected_strategy = STRATEGY_MAP[args.strategy]
-    run_backtest(args.csv, selected_strategy, args.cash, args.commission, args.plot)
+    run_backtest(args.csv, selected_strategy, args.cash, args.commission, args.plot, multi_timeframe=args.multi_timeframe)
 

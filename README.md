@@ -38,10 +38,10 @@ This project implements a backtesting script for a trading strategy with Backtra
    
    Example: Testing EMABollingerStrategy on 4-hour timeframe
    ```sh
-   python3 backtest.py --csv data/gold_4h_data_cleaned.csv --strategy ema_bollinger --plot-file backtest_plot.png
+   python3 backtest.py --csv data/gold_15min_data.csv --strategy multi_support_resistance --plot-file backtest_plot.png --multi_timeframe
 
 ## Example Results
-![alt text](image.png)
+![alt text](image-1.png)
 
 ## Library
 - BackTrader Python: https://www.backtrader.com/docu/quickstart/quickstart/
