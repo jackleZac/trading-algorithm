@@ -1,7 +1,7 @@
 import backtrader as bt
 
 class SupportResistance(bt.Indicator):
-    """Determine support and resistance formed over the specified number of bars"""
+    """Identify support and resistance over the specified number of bars"""
     lines = ('support', 'resistance',)
     # Look back over the specified number of bars (20 by default)
     params = (('period', 20),)

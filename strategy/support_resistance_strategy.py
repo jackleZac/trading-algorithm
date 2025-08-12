@@ -1,3 +1,4 @@
+##############################################################################################################
 """
 Multi Support & Resistance Breakout Strategy using Backtrader
 
@@ -19,6 +20,7 @@ Take Profit:
 
 Note: Max 5 layers
 """
+################################################################################################################
 
 import math
 import backtrader as bt
@@ -162,6 +164,30 @@ class EMAMultiSupportResistanceStrategy(bt.Strategy):
         self.long_layers = 0
         self.short_layers = 0
 
+
+###########################################################################################################################################
+"""
+Multi Support & Resistance Breakout Strategy using Backtrader
+
+Buy criteria:
+    - Price breaks ABOVE resistance by breakout buffer (0.10)
+    - Close price is above fast EMA and fast EMA is above slow EMA (uptrend)
+    - During London session and London/New York overlap (13:00–17:00 UTC)
+    - A bullish engulfing pattern is formed within a loose proximity
+Sell criteria:
+    - Price breaks BELOW support by breakout buffer (0.10)
+    - Close price is below fast EMA and fast EMA is below slow EMA (downtrend)
+    - During London session and London/New York overlap (13:00–17:00 UTC)
+    - A bearish engulfing pattern is formed within a loose proximity
+Stop Loss:
+    - Fixed at 0.50 USD (50 pips) from entry
+
+Take Profit:
+    - Fixed at 1.00 USD (100 pips) from entry
+
+Note: Max 5 layers
+"""
+###########################################################################################################################################
 
 class ATRSupportResistanceStrategy(bt.Strategy):
     params = dict(

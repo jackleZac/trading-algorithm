@@ -2,7 +2,14 @@ import backtrader as bt
 import math
 
 class MultiSupportResistance(bt.Indicator):
-    lines = ('resistance1', 'resistance2', 'resistance3', 'support1', 'support2', 'support3')
+    """
+    Identify up to 6 supports and resistances
+    params:
+        period (int): number of bars to calculate MA
+    """
+    lines = (
+        'resistance1', 'resistance2', 'resistance3', 
+        'support1', 'support2', 'support3' )
     params = dict(period=80)
 
     def __init__(self):
